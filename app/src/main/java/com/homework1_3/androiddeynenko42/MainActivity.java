@@ -5,6 +5,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.appcompat.widget.Toolbar;
 import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
+import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.View;
@@ -23,14 +24,12 @@ public class MainActivity extends AppCompatActivity {
 
     private final static String TITLE = "title";
     private final static String SUBTITLE = "subtitle";
-    private static String TEXT = "text";
-    SharedPreferences sharedPref;
-    ListView list;
-    String txt;
-    String result;
-    String[] content = prepareContent();
-    final BaseAdapter listContentAdapter = createAdapter(content);
-    SharedPreferences.Editor myEditor;
+    private final static String TEXT = "text";
+    private SharedPreferences sharedPref;
+    private ListView list;
+    private String result;
+    private String[] content ;
+    private SharedPreferences.Editor myEditor;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +39,10 @@ public class MainActivity extends AppCompatActivity {
         setSupportActionBar(toolbar);
 
         updateList();
+        content = prepareContent();
+        final BaseAdapter listContentAdapter = createAdapter(content);
+        list.setAdapter(listContentAdapter);
+        listContentAdapter.notifyDataSetChanged();
 
         list.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -69,17 +72,14 @@ public class MainActivity extends AppCompatActivity {
         }
 
         private void updateList(){
-        myEditor = sharedPref.edit();
-        if (!getString(R.string.large_text).contentEquals(myEditor.toString())) {
-            txt = getString(R.string.large_text);
-            myEditor.putString(TEXT, txt);
+            sharedPref = getSharedPreferences(getString(R.string.large_text), Context.MODE_PRIVATE);
+            myEditor = sharedPref.edit();
+        if (!getString(R.string.large_text).contentEquals(sharedPref.toString())) {
+            myEditor.putString(TEXT, getString(R.string.large_text));
             myEditor.apply();
-            result = sharedPref.getString(TEXT,txt);
+            result = sharedPref.getString(TEXT, getString(R.string.large_text));
         }
-
             content = prepareContent();
-            list.setAdapter(listContentAdapter);
-            listContentAdapter.notifyDataSetChanged();
         }
 
     @NonNull
@@ -107,4 +107,9 @@ public class MainActivity extends AppCompatActivity {
         return result.split("\n\n");
     }
 
+    @Override
+    public String toString() {
+        return
+                " " + sharedPref;
+    }
 }
